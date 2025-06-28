@@ -1,0 +1,52 @@
+<!-- inventory/templates/inventory/sales_report.html -->
+
+{% extends 'inventory/base.html' %} {% block title %}Sales Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Sales Report</h1>
+  <div class="card text-white bg-success">
+    <div class="card-body">
+      <h5 class="card-title">Total Revenue</h5>
+      <p class="card-text fs-4">${{ total_revenue|floatformat:2 }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">All Transactions</div>
+  <div class="card-body">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Sale ID</th>
+          <th>Date & Time</th>
+          <th>Items Sold</th>
+          <th>Total Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in sales %}
+        <tr>
+          <td>#{{ sale.pk }}</td>
+          <td>{{ sale.created_at }}</td>
+          <td>
+            <ul class="list-unstyled mb-0">
+              {% for item in sale.items.all %}
+              <li>{{ item.quantity }} x {{ item.medicine.name }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td>${{ sale.total_amount|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">
+            No sales have been recorded yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

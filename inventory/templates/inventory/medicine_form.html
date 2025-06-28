@@ -1,0 +1,94 @@
+<!-- inventory/templates/inventory/medicine_form.html -->
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h2 class="mb-0">
+            {% if form.instance.pk %}
+                Edit Medicine
+            {% else %}
+                Add New Medicine
+            {% endif %}
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6 mb-3">
+                    <h4>Core Information</h4>
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.brand_name.id_for_label }}" class="form-label">{{ form.brand_name.label }}</label>
+                        {{ form.brand_name }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">{{ form.category.label }}</label>
+                        {{ form.category }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.dosage_form.id_for_label }}" class="form-label">{{ form.dosage_form.label }}</label>
+                        {{ form.dosage_form }}
+                    </div>
+
+                    <h4 class="mt-4">Supplier & Storage</h4>
+                    <div class="mb-3">
+                        <label for="{{ form.supplier_name.id_for_label }}" class="form-label">{{ form.supplier_name.label }}</label>
+                        {{ form.supplier_name }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.storage_info.id_for_label }}" class="form-label">{{ form.storage_info.label }}</label>
+                        {{ form.storage_info }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.location.id_for_label }}" class="form-label">{{ form.location.label }}</label>
+                        {{ form.location }}
+                    </div>
+                </div>
+                <!-- Right Column -->
+                <div class="col-md-6 mb-3">
+                    <h4>Pricing & Stock</h4>
+                     <div class="mb-3">
+                        <label for="{{ form.purchase_price.id_for_label }}" class="form-label">{{ form.purchase_price.label }}</label>
+                        {{ form.purchase_price }}
+                    </div>
+                     <div class="mb-3">
+                        <label for="{{ form.selling_price.id_for_label }}" class="form-label">{{ form.selling_price.label }}</label>
+                        {{ form.selling_price }}
+                    </div>
+                     <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">{{ form.quantity.label }}</label>
+                        {{ form.quantity }}
+                    </div>
+                     <div class="mb-3">
+                        <label for="{{ form.batch_number.id_for_label }}" class="form-label">{{ form.batch_number.label }}</label>
+                        {{ form.batch_number }}
+                    </div>
+
+                    <h4 class="mt-4">Dates</h4>
+                     <div class="mb-3">
+                        <label for="{{ form.purchase_date.id_for_label }}" class="form-label">{{ form.purchase_date.label }}</label>
+                        {{ form.purchase_date }}
+                    </div>
+                     <div class="mb-3">
+                        <label for="{{ form.expiry_date.id_for_label }}" class="form-label">{{ form.expiry_date.label }}</label>
+                        {{ form.expiry_date }}
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <button type="submit" class="btn btn-success">Save</button>
+            <a href="{% url 'medicine_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

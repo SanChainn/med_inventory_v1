@@ -1,0 +1,174 @@
+<!-- inventory/templates/inventory/pos.html -->
+{% extends 'inventory/base.html' %} {% block title %}Point of Sale{% endblock %}
+{% block content %}
+<div class="row">
+  <!-- Medicine Selection -->
+  <div class="col-md-5">
+    <h2>Available Medicines</h2>
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control mb-3"
+      placeholder="Search for medicines..."
+    />
+    <div
+      id="medicine-list"
+      class="list-group"
+      style="max-height: 60vh; overflow-y: auto"
+    >
+      {% for medicine in medicines %}
+      <a
+        href="#"
+        class="list-group-item list-group-item-action medicine-item"
+        data-id="{{ medicine.pk }}"
+        data-name="{{ medicine.name }}"
+        data-price="{{ medicine.selling_price }}"
+        data-stock="{{ medicine.quantity }}"
+      >
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ medicine.name }}</h5>
+          <small>In Stock: {{ medicine.quantity }}</small>
+        </div>
+        <p class="mb-1">Price: ${{ medicine.selling_price|floatformat:2 }}</p>
+      </a>
+      {% empty %}
+      <p>No medicines in stock.</p>
+      {% endfor %}
+    </div>
+  </div>
+  <!-- Cart -->
+  <div class="col-md-7">
+    <h2>Current Sale (Cart)</h2>
+    <div class="card">
+      <div class="card-body">
+        <ul id="cart-items" class="list-group list-group-flush">
+          <li id="empty-cart-message" class="list-group-item">Cart is empty</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <h4>Total: $<span id="cart-total">0.00</span></h4>
+          <button id="checkout-btn" class="btn btn-success btn-lg" disabled>
+            Complete Sale
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="alert-placeholder" class="mt-3"></div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cart = {};
+    const cartItemsList = document.getElementById("cart-items");
+    const emptyCartMessage = document.getElementById("empty-cart-message");
+    const cartTotalSpan = document.getElementById("cart-total");
+    const checkoutBtn = document.getElementById("checkout-btn");
+
+    function updateCart() {
+      cartItemsList.innerHTML = "";
+      let total = 0;
+      if (Object.keys(cart).length === 0) {
+        cartItemsList.appendChild(emptyCartMessage);
+        checkoutBtn.disabled = true;
+      } else {
+        checkoutBtn.disabled = false;
+        for (const id in cart) {
+          const item = cart[id];
+          total += item.price * item.quantity;
+          const li = document.createElement("li");
+          li.className =
+            "list-group-item d-flex justify-content-between align-items-center";
+          li.innerHTML = `<div>${
+            item.name
+          }<br><small class="text-muted">$${item.price.toFixed(2)} x ${
+            item.quantity
+          }</small></div>
+                                <div><button class="btn btn-sm btn-secondary" onclick="updateQuantity('${id}', -1)">-</button>
+                                <span class="mx-2">${item.quantity}</span>
+                                <button class="btn btn-sm btn-secondary" onclick="updateQuantity('${id}', 1)">+</button>
+                                <button class="btn btn-sm btn-danger ms-2" onclick="removeItem('${id}')">X</button></div>`;
+          cartItemsList.appendChild(li);
+        }
+      }
+      cartTotalSpan.textContent = total.toFixed(2);
+    }
+
+    document.querySelectorAll(".medicine-item").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        e.preventDefault();
+        const { id, name, price, stock } = e.currentTarget.dataset;
+        if (cart[id]) {
+          if (cart[id].quantity < parseInt(stock)) cart[id].quantity++;
+          else showAlert("Cannot add more than available stock.", "warning");
+        } else {
+          cart[id] = {
+            name,
+            price: parseFloat(price),
+            quantity: 1,
+            stock: parseInt(stock),
+          };
+        }
+        updateCart();
+      });
+    });
+
+    document.getElementById("searchInput").addEventListener("keyup", (e) => {
+      const filter = e.target.value.toLowerCase();
+      document
+        .querySelectorAll("#medicine-list .medicine-item")
+        .forEach((item) => {
+          item.style.display = item.dataset.name.toLowerCase().includes(filter)
+            ? ""
+            : "none";
+        });
+    });
+
+    checkoutBtn.addEventListener("click", () => {
+      const cartForServer = Object.keys(cart).map((id) => ({
+        id,
+        quantity: cart[id].quantity,
+      }));
+      fetch("{% url 'pos' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ cart: cartForServer }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success") {
+            showAlert("Sale successful! Redirecting to voucher...", "success");
+            setTimeout(() => {
+              window.location.href = `/sales/receipt/${data.sale_id}/`;
+            }, 1500);
+          } else {
+            showAlert(data.message, "danger");
+          }
+        })
+        .catch(() => showAlert("An error occurred during checkout.", "danger"));
+    });
+
+    function showAlert(message, type) {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+      document.getElementById("alert-placeholder").append(wrapper);
+    }
+
+    window.updateQuantity = (id, change) => {
+      const newQty = cart[id].quantity + change;
+      if (newQty > 0 && newQty <= cart[id].stock) cart[id].quantity = newQty;
+      else if (newQty <= 0) delete cart[id];
+      else showAlert("Cannot add more than available stock.", "warning");
+      updateCart();
+    };
+    window.removeItem = (id) => {
+      delete cart[id];
+      updateCart();
+    };
+  });
+</script>
+{% endblock %}
