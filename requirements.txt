@@ -1,6 +1,4 @@
-asgiref @ file:///home/conda/feedstock_root/build_artifacts/asgiref_1733215607532/work
 dj-database-url==3.0.1
-Django @ file:///home/conda/feedstock_root/build_artifacts/django_1749571466758/work
 et_xmlfile==2.0.0
 numpy==2.3.1
 openpyxl==3.1.5
@@ -9,5 +7,3 @@ psycopg2-binary==2.9.10
 python-dateutil==2.9.0.post0
 pytz==2025.2
 six==1.17.0
-sqlparse @ file:///home/conda/feedstock_root/build_artifacts/sqlparse_1734007102193/work
-tzdata==2025.2
