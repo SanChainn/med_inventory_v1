@@ -10,5 +10,4 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 six==1.17.0
 sqlparse @ file:///home/conda/feedstock_root/build_artifacts/sqlparse_1734007102193/work
-typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_typing_extensions_1748959427/work
 tzdata==2025.2
